@@ -47,8 +47,8 @@ Sample Input #1
 100
 0 0 0
 2 2 0
-9 0 S
--2 2 O
+9 0 5
+-2 2 0
 
 Sample Output #1
 5.000000
@@ -67,32 +67,49 @@ def get_int_triplet():
     return map(int, raw_input().split())
 
 
-def distance_3d(p1, p2):
-    summary = 0
-    for i in xrange(3):
-        summary += (p2[i] - p1[i]) ** 2
-    return sqrt(summary)
+def scalar_product(v1, v2):
+    return sum(v1[i] * v2[i] for i in xrange(3))
+
+
+def vector_product(v1, v2):
+    return [v1[1] * v2[2] - v1[2] * v2[1],
+            v1[2] * v2[0] - v1[0] * v2[2],
+            v1[0] * v2[1] - v1[1] * v2[0]]
+
+
+def vector_abs(vector):
+    return sqrt(sum(vector[i] ** 2 for i in xrange(3)))
+
+
+def main(time, bo_initial_point, bo_speeds, masao_initial_point, masao_speeds):
+    """
+    Algorithm:
+    Let's represent moving planes as vectors (V1 and V2):
+
+    V = initial_point + time * speed
+
+    Then, the minimal distance between two moving point is perpendicular
+    from line of V1 to line of V2.
+
+    Define perpendicular by vector product of V1 and V2.
+    Length of perpendicular equals target minimal distance between points.
+
+    min_distance = scalar_product(V2 - V1, perpendicular_as_vector)
+
+    Time complexity: ~O(1) (constant)
+    """
+    perpendicular = vector_product(bo_speeds, masao_speeds)
+    perpendicular_abs = vector_abs(perpendicular)
+    distance = scalar_product([masao_initial_point[i] - bo_initial_point[i] for i in xrange(3)],
+                              [(perpendicular[i] / perpendicular_abs) if perpendicular_abs else 0
+                               for i in xrange(3)])
+    return distance
 
 
 if __name__ == '__main__':
-    time = input()
-    bo_initial_point = get_int_triplet()
-    bo_speeds = get_int_triplet()
-    masao_initial_point = get_int_triplet()
-    masao_speeds = get_int_triplet()
-
-    min_distance = float('inf')
-    previous_distance = float('inf')
-
-    for t in range(time+1):
-        distance = distance_3d([bo_initial_point[i] + bo_speeds[i] * t for i in xrange(3)],
-                               [masao_initial_point[i] + masao_speeds[i] * t for i in xrange(3)])
-        if distance < min_distance:
-            min_distance = distance
-
-        if previous_distance > distance:
-            previous_distance = distance
-        else:
-            break
-
-    print "%.6f" % min_distance
+    result = main(time=input(),
+                  bo_initial_point=get_int_triplet(),
+                  bo_speeds=get_int_triplet(),
+                  masao_initial_point=get_int_triplet(),
+                  masao_speeds=get_int_triplet())
+    print "%.6f" % result

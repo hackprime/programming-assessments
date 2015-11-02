@@ -23,10 +23,10 @@ For each test case print a single line containing maximum bonus that you can get
 
 [Constraints]
 1<=t<=10
-1<=n<=10^3
-1<=D<=10^3
+1<=n<=1000
+1<=D<=1000
 1<=P<=D
-1<=B<=10^3
+1<=B<=1000
 
 Sample Input
 1
@@ -42,39 +42,59 @@ Sample Output
 20
 """
 
+
 def compare_tasks(task1, task2):
-    # comparing deadlines
-    if task1[0] > task2[0]:
-        return 1
-    elif task1[0] < task2[0]:
-        return -1
-    # comparing bonuses
+    # bonus should be maximal
     if task1[1] > task2[1]:
         return 1
     elif task1[1] < task2[1]:
         return -1
-    return 1
+    # duration should be minimal
+    if task1[2] > task2[2]:
+        return -1
+    elif task1[2] < task2[2]:
+        return 1
+    return 0
 
 
-if __name__ == '__main__':
-    cases = input()
-    for case in xrange(cases):
-        taks_count = input()
-        tasks = []
-        for i in xrange(taks_count):
-            tasks.append(map(int, raw_input().split()))
+def main(cases_count, cases):
+    """
+    Algorithm: Sort tasks by bonus (greather first) and deadline (greather last),
+    then iterate throgh sorted tasks calculate maximal bonus that I can get in limited time.
 
+    NOTE: Python uses stable merge sort algorithm, so I can sort by several values simultaneously.
+
+    Time complexity: ~O(N1 + N2 + ... + Nn)
+    where N1, N2, ..., Nn - number of tasks on every test case
+    n - number of test cases
+    """
+    case_bonuses = []
+    for case_tasks in cases:
         # assuming that max value of deadline is a whole time for tasks processing
-        time = max(item[0] for item in tasks)
+        time = max(task[0] for task in case_tasks)
         bonuses = 0
 
-        sorted_tasks = sorted(tasks, cmp=compare_tasks, reverse=True)
+        sorted_tasks = sorted(case_tasks, cmp=compare_tasks, reverse=True)
 
         for deadline, bonus, duration in sorted_tasks:
             if time - duration < 0:
                 continue
-
             time -= duration
             bonuses += bonus
 
-        print bonuses
+        case_bonuses.append(bonuses)
+
+    return case_bonuses
+
+
+if __name__ == '__main__':
+    cases_count = input()
+    cases = []
+    for _ in xrange(cases_count):
+        taks_count = input()
+        tasks = []
+        for i in xrange(taks_count):
+            tasks.append(map(int, raw_input().split()))
+        cases.append(tasks)
+
+    print main(cases_count, cases)
