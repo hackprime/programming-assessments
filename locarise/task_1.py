@@ -97,4 +97,5 @@ if __name__ == '__main__':
             tasks.append(map(int, raw_input().split()))
         cases.append(tasks)
 
-    print main(cases_count, cases)
+    for result in main(cases_count, cases):
+        print result
